@@ -36,6 +36,13 @@ function Create()
     --Setup--
     buffer = console:createBuffer("Buffer")
 
+    --Network--
+    console:log("Connecting to 127.0.0.1:8888...")
+	sock = socket.tcp()
+	if sock:connect("127.0.0.1", 8888) then
+		console:log("Socket Test: Connected")
+    end
+
     --CONSTS--
     state = StateStarter;
 
