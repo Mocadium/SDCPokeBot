@@ -1,77 +1,90 @@
+--MISC FUNCTIONS--
+function tobstring(num, num_bits)
+    local bstring = ""
+    
+    for i = num_bits - 1, 0, -1 do
+        local bit_value = (num >> i) & 1
+        bstring = bstring .. tostring(bit_value)
+    end
+    
+    return bstring
+end
+
+function readPokemon(address)
+    if (emu:read32(address) == 0) then
+        return nil
+    end
+
+    local str = ""
+    for i = 0, 99 do
+        local data = tobstring(emu:read8(address+i), 8)
+        str = str .. data
+    end
+    return str
+end
+
+function GMLSend(header, string)
+    sock:send(header.."\0"..string.."\0")
+end
+
 --STATES--
 function StateStarter()
-    PID = emu:read32(0x02024284);
-    buffer:print("Pokemon ID: " .. PID)
-    buffer:moveCursor(0, 1)
-    GetShinyValue(PID)
-    --buffer:print("Shiny Value: " .. GetShinyValue(PID))
-end
+    pokemon_data_old = pokemon_data
+    pokemon_data = readPokemon(0x02024284)
 
---MISC FUNCTIONS--
-function GetPlayerData()
-    address = emu:read32(0x03005008)
-
-    player = {}
-    player.x = emu:read16(address)
-    player.y = emu:read16(address+2)
-
-    buffer:print("Player X: " .. player.x .. ", Y: " .. player.y)
-    buffer:moveCursor(0, 1)
-    buffer:print("TID: " .. tostring(TID).. ", SID: " .. tostring(SID))
-end
-
-function GetShinyValue(PID)
-    p1 = PID >> 16
-    p2 = PID & 0xFFFF
-    SV = TID ~ SID ~ p1 ~ p2
-
-    buffer:print("P1: " .. p1 .. ", P2: " .. p2)
-    buffer:moveCursor(0, 2)
-    buffer:print("Shiny Value:" .. SV)
-    return
+    if (pokemon_data ~= nil) then
+        if (pokemon_data ~= pokemon_data_old) then
+            buffer:clear()
+            buffer:print("New Pokemon Data: " .. pokemon_data)
+            GMLSend(0, pokemon_data)
+            console:log("Sent New Pokemon Data to GameMaker")
+        end
+    end
 end
 
 --CREATE FUNCTION--
 function Create()
     --Setup--
     buffer = console:createBuffer("Buffer")
+    state = StateStarter
+    pokemon_data = nil
 
     --Network--
-    console:log("Connecting to 127.0.0.1:8888...")
+    console:log("Connecting to Server...")
 	sock = socket.tcp()
-	if sock:connect("127.0.0.1", 8888) then
-		console:log("Socket Test: Connected")
+	if sock:connect("127.0.0.1", 55555) then
+		console:log("Socket: Connected")
     end
-
-    --CONSTS--
-    state = StateStarter;
-
+    
     --IDs--
     IDaddress = emu:read32(0x0300500C)
     TID = emu:read16(IDaddress+0x000A)
     SID = emu:read16(IDaddress+0x000C)
 end
 
-
 --STEP FUNCTION--
 function Step()
-
     --BUFFER--
 	if not buffer then
 		return
 	end
-    buffer:clear()
     buffer:moveCursor(0, 0)
 
     --STATE--
-    if state ~= nil then
+    if (state ~= nil) then
         state()
     end
+end
+
+--END FUNCTION--
+function End()
+    sock:close()
 end
 
 --START--
 callbacks:add("start", Create)
 callbacks:add("frame", Step)
+callbacks:add("stop", End)
 if emu then
 	Create()
 end
