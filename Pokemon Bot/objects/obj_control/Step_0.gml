@@ -17,8 +17,34 @@
 	camera_set_view_size(view_camera[0], global.camera_w, global.camera_h);
 #endregion
 
-
-
+if (!shiny_found) {
+	if (!restart) {
+		timer = sin(current_time/100);
+	
+		if (global.pokemon == undefined) {
+			keyboard_key_release(vk_f2);
+			if (timer >= 0) {
+				keyboard_key_press(vk_numpad0);
+			} else {
+				keyboard_key_release(vk_numpad0);
+			}
+		} else {
+			if (global.pokemon.shiny >= 8) {
+				timer = 60;
+				restart = true;
+			} else {
+				shiny_found = true;
+				exit;
+			}
+		}
+	} else {
+		if (timer-- <= 0) {
+			keyboard_key_press(vk_f2);
+			global.pokemon = undefined;
+			restart = false;
+		}
+	}
+}
 
 //if (dpad != undefined)
 	//keyboard_key_release(dpad);

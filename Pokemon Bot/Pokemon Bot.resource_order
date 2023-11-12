@@ -1,4 +1,6 @@
 {
   "FolderOrderSettings": [],
-  "ResourceOrderSettings": [],
+  "ResourceOrderSettings": [
+    {"name":"Pokemon","order":1,"path":"scripts/Pokemon/Pokemon.yy",},
+  ],
 }
