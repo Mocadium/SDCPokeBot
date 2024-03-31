@@ -46,3 +46,8 @@ global.char_map =
 global.pokemon = undefined;
 restart = false;
 shiny_found = false;
+
+global.encounters = 0;
+global.shiny_max = 0;
+global.shiny_min = 65535;
+global.shiny_list = [];

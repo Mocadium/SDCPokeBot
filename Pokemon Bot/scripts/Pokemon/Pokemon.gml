@@ -16,14 +16,12 @@ function Pokemon(_pid, _otid, _nickname, _trainer, _markings, _species, _status,
 	
 	#region Shininess
 		var _otid_b = dec_to_bin(otid, 4);
-		var _pid_b = dec_to_bin(pid, 4);
-		
 		var _tid = bin_to_dec(_otid_b, 0, 2);
 		var _sid = bin_to_dec(_otid_b, 2, 2);
-		var _p1 = bin_to_dec(_pid_b, 0, 2);
-		var _p2 = bin_to_dec(_pid_b, 2, 2);
+		var _p1 = pid div 65536;
+		var _p2 = pid mod 65536;
 		
-		shiny = (_tid ^ _sid) ^ (_p1 ^ _p2);
+		shiny = _tid ^ _sid ^ _p1 ^ _p2;
 	#endregion
 }
 

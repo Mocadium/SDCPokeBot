@@ -22,13 +22,20 @@ if (!shiny_found) {
 		timer = sin(current_time/100);
 	
 		if (global.pokemon == undefined) {
-			keyboard_key_release(vk_f2);
+			keyboard_key_release(vk_control);
+			keyboard_key_release(ord("R"));
 			if (timer >= 0) {
 				keyboard_key_press(vk_numpad0);
 			} else {
 				keyboard_key_release(vk_numpad0);
 			}
 		} else {
+			global.shiny_max = max(global.shiny_max, global.pokemon.shiny);
+			global.shiny_min = min(global.shiny_min, global.pokemon.shiny);
+			++global.encounters;
+			array_insert(global.shiny_list, 0, global.pokemon.shiny);
+			if (array_length(global.shiny_list) > 16)
+				array_pop(global.shiny_list);
 			if (global.pokemon.shiny >= 8) {
 				timer = 60;
 				restart = true;
@@ -39,7 +46,8 @@ if (!shiny_found) {
 		}
 	} else {
 		if (timer-- <= 0) {
-			keyboard_key_press(vk_f2);
+			keyboard_key_press(vk_control);
+			keyboard_key_press(ord("R"));
 			global.pokemon = undefined;
 			restart = false;
 		}
